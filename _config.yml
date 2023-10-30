@@ -1,1 +1,18 @@
-source: .
+source: _pages
+
+
+permalink: pretty
+
+# Permalink settings for specific pages
+defaults:
+  - scope:
+      path: "index"
+      type: "pages"
+    values:
+      permalink: "/"
+
+  - scope:
+      path: "about-me" # path to the about-me.html file without the file extension
+      type: "pages"
+    values:
+      permalink: "/about"
