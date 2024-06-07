@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Jonáš Erlebach</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="index.css">
+</head>
+<body>
+<nav class="navbar close" id="navbar">
+  <div class="navbar-toggle" onclick="toggleNavbar()">
+    <span id="toggleIcon" style="user-select: none">&#9776;</span>
+  </div>
+  <ul class="navbar-menu" id="navbarMenu">
+    <li><a href="https://github.com/jonasek369/">Github</a></li>
+      <li><a href="/contact">Contact</a></li>
+  </ul>
+</nav>
+<div class="about-me">
+    <h1>About me</h1>
+    <p>I have been programming for about 4 years starting in Python and sticking to It.</p>
+    <p>I also have experience in Kotlin, Java, C#, C and knowledge of making basic website and backend using Flask, Redis, sqlite3, mongoDB, HTML/CSS/JS</p>
+</div>
+
+<div class="projects-container">
+
+    <div class="project-box">
+        <h2 class="project-title">Local mangadex</h2>
+        <p class="project-description">Python implementation of api allowing local downloading</p>
+        <a href="https://github.com/jonasek369/local-mdx-public" class="project-link">View Project</a>
+    </div>
+    <div class="project-box">
+        <h2 class="project-title">AirWarfare</h2>
+        <p class="project-description">Air warfare game made in pygame</p>
+        <a href="https://github.com/jonasek369/Plane-Game" class="project-link">View Project</a>
+    </div>
+</div>
+<script>
+    function toggleNavbar() {
+        const navbar = document.getElementById('navbar');
+        const navbarMenu = document.getElementById("navbarMenu")
+        if(navbar.classList.contains("open")){
+            navbar.classList.remove("open");
+            navbar.classList.add("close");
+            navbarMenu.style.display = "none";
+        }else{
+            navbar.classList.add("open");
+            navbar.classList.remove("close");
+            navbarMenu.style.display = "block";
+        }
+    }
+</script>
+</body>
+</html>
