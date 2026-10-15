@@ -1,0 +1,102 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="How a friend and I turned an industrial collaborative robot into a tic-tac-toe opponent for our high school graduation project."><title>Tic-Tac-Toe on a FANUC CRX-10iA · Jonáš Erlebach</title><link rel="stylesheet" href="/_astro/Nav.BLiZqyMI.css"><style>body.article-page{background:var(--bg);color:var(--text)}.article-main{min-height:100vh;padding:200px 28px 120px}.article{max-width:760px;margin:0 auto}.back-link{color:var(--muted);margin-bottom:40px;font-size:14px;text-decoration:none;transition:color .18s;display:inline-block}.back-link span{transition:transform .18s;display:inline-block}.back-link:hover{color:var(--accent)}.back-link:hover span{transform:translate(-3px)}.article-header{margin-bottom:40px}.article-header h1{letter-spacing:-1.5px;margin-bottom:18px;font-size:clamp(32px,6vw,52px);font-weight:700;line-height:1.15}.article-header h1 .dot{color:var(--accent)}.article-summary{color:var(--muted);margin-bottom:24px;font-size:17px;line-height:1.7}.article-meta{border-top:1px solid var(--border);border-bottom:1px solid var(--border);color:var(--muted);letter-spacing:.5px;flex-wrap:wrap;align-items:center;gap:8px 20px;margin-bottom:20px;padding:16px 0;font-size:12px;display:flex}.article-meta .project-link{letter-spacing:0;margin-left:auto}.article-cover{border:1px solid var(--border);background:var(--surface);border-radius:14px;margin-bottom:48px;overflow:hidden}.article-cover img{width:100%;height:auto;display:block}.prose{color:#cbd5e1;font-size:16px;line-height:1.85}.prose>*+*{margin-top:1.4em}.prose h2{color:var(--text);letter-spacing:-.8px;margin-top:2.6em;font-size:28px;line-height:1.3}.prose h3{color:var(--text);letter-spacing:-.3px;margin-top:2em;font-size:20px;line-height:1.4}.prose strong{color:var(--text)}.prose a{color:var(--accent);text-underline-offset:3px}.prose a:hover{text-decoration-thickness:2px}.prose ul,.prose ol{padding-left:1.4em}.prose li+li{margin-top:.5em}.prose li::marker{color:var(--accent)}.prose blockquote{border-left:3px solid var(--accent);color:var(--muted);padding:4px 0 4px 20px;font-style:italic}.prose img{border:1px solid var(--border);border-radius:10px;max-width:100%;height:auto;display:block}.prose hr{background:var(--border);height:1px;margin:3em 0}.prose code{border:1px solid var(--border);background:var(--surface);color:var(--accent);border-radius:5px;padding:2px 6px;font-family:JetBrains Mono,monospace;font-size:.88em}.prose pre{border:1px solid var(--border);border-radius:10px;padding:20px;font-size:14px;line-height:1.7;overflow-x:auto;background:var(--surface)!important}.prose pre code{color:inherit;font-size:inherit;background:0 0;border:0;padding:0}.prose table{border-collapse:collapse;width:100%;font-size:14px}.prose th,.prose td{border:1px solid var(--border);text-align:left;padding:10px 14px}.prose th{background:var(--surface);color:var(--text)}@media (width<=760px){.article-main{padding:180px 20px 90px}.article-meta .project-link{margin-left:0}}
+</style></head><body class="article-page"><header><nav><div id="brand"><a href="https://www.github.com/jonasek369" aria-label="GitHub profile"><div id="logo"></div></a></div></nav></header><main class="article-main"><article class="article"><a class="back-link" href="/#cards"><span>←</span> All projects</a><header class="article-header"><span class="eyebrow">ROBOTICS</span><h1>Tic-Tac-Toe on a FANUC CRX-10iA<span class="dot">.</span></h1><p class="article-summary">How a friend and I turned an industrial collaborative robot into a tic-tac-toe opponent for our high school graduation project.</p><div class="article-meta"><time datetime="2026-10-15T00:00:00.000Z">15 October 2026</time><span>3 min read</span><a class="project-link" href="https://github.com/jonasek369/local-mdx-public" target="_blank" rel="noopener noreferrer">View project <span>↗</span></a></div></header><figure class="article-cover"><img src="/imgs/fanuc.jpg" alt="FANUC CRX-10iA collaborative robot playing tic-tac-toe"></figure><div class="prose"><h2 id="the-idea">The Idea</h2>
+<p>This project started with a challenge from our teacher: build something that our school could showcase at various educational and technology fairs.</p>
+<p>We took on the challenge, but first, we had to figure out how to make it work. I started digging through the web for documentation, examples, and anything that could help us understand how to communicate with a FANUC robot programmatically. After hours of research, I began to understand how the robot worked under the hood.</p>
+<h2 id="communicating-with-the-robot">Communicating with the Robot</h2>
+<p>I discovered that we could execute KAREL, FANUC’s proprietary robot programming language, through HTTP requests. This gave us an idea: build a simple html file that would serve as the user interface for our tic-tac-toe game and communicate directly with the robot.</p>
+<p>The key was a small KAREL program that allowed us to update the robot’s internal integer registers through a single request:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="pascal"><code><span class="line"><span style="color:#F97583">PROGRAM</span><span style="color:#E1E4E8"> set_game_registers</span></span>
+<span class="line"><span style="color:#E1E4E8">%COMMENT = </span><span style="color:#9ECBFF">'Test'</span></span>
+<span class="line"><span style="color:#E1E4E8">%NOLOCKGROUP</span></span>
+<span class="line"><span style="color:#E1E4E8">-- %NOPAUSE = ERROR+COMMAND+TPENABLE</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">VAR</span></span>
+<span class="line"><span style="color:#E1E4E8">    status: </span><span style="color:#F97583">INTEGER</span></span>
+<span class="line"><span style="color:#E1E4E8">    x: </span><span style="color:#F97583">STRING</span><span style="color:#E1E4E8">[</span><span style="color:#79B8FF">10</span><span style="color:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#E1E4E8">    xi: </span><span style="color:#F97583">INTEGER</span></span>
+<span class="line"><span style="color:#E1E4E8">    y: </span><span style="color:#F97583">STRING</span><span style="color:#E1E4E8">[</span><span style="color:#79B8FF">10</span><span style="color:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#E1E4E8">    yi: </span><span style="color:#F97583">INTEGER</span></span>
+<span class="line"><span style="color:#E1E4E8">    return_code: </span><span style="color:#F97583">INTEGER</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">BEGIN</span></span>
+<span class="line"><span style="color:#E1E4E8">    CNV_STR_INT(x, xi)</span></span>
+<span class="line"><span style="color:#E1E4E8">    CNV_STR_INT(y, yi)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">    SET_INT_REG(</span><span style="color:#79B8FF">10</span><span style="color:#E1E4E8">, xi, status)</span></span>
+<span class="line"><span style="color:#E1E4E8">    SET_INT_REG(</span><span style="color:#79B8FF">11</span><span style="color:#E1E4E8">, yi, status)</span></span>
+<span class="line"><span style="color:#E1E4E8">    SET_INT_REG(</span><span style="color:#79B8FF">12</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">, status)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">    return_code = </span><span style="color:#79B8FF">204</span></span>
+<span class="line"><span style="color:#F97583">END</span><span style="color:#E1E4E8"> set_game_registers</span></span></code></pre>
+<p>And just like that, we had established communication between the web interface and the robot. The web application could send moves, and the robot could use those inputs to play the game.</p>
+<h2 id="implementing-minimax-in-karel">Implementing Minimax in KAREL</h2>
+<p>With the communication layer in place, I turned my attention to the AI. I took a basic minimax implementation and rewrote it in KAREL so the robot could determine its next move.</p>
+<p>Minimax is a recursive decision-making algorithm that explores possible moves, evaluates the resulting board positions, and chooses the move with the best outcome, assuming both players play optimally.</p>
+<p>Here’s the core of my KAREL implementation:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="pascal"><code><span class="line"><span style="color:#E1E4E8">ROUTINE MINIMAX(b: </span><span style="color:#F97583">ARRAY</span><span style="color:#E1E4E8">[*] </span><span style="color:#F97583">OF</span><span style="color:#F97583"> INTEGER</span><span style="color:#E1E4E8">; depth: </span><span style="color:#F97583">INTEGER</span><span style="color:#E1E4E8">; ismax: </span><span style="color:#F97583">BOOLEAN</span><span style="color:#E1E4E8">): </span><span style="color:#F97583">REAL</span></span>
+<span class="line"><span style="color:#F97583">VAR</span></span>
+<span class="line"><span style="color:#E1E4E8">    score: </span><span style="color:#F97583">REAL</span></span>
+<span class="line"><span style="color:#E1E4E8">    best: </span><span style="color:#F97583">REAL</span></span>
+<span class="line"><span style="color:#E1E4E8">    tmp: </span><span style="color:#F97583">REAL</span></span>
+<span class="line"><span style="color:#E1E4E8">    mnm_i: </span><span style="color:#F97583">INTEGER</span></span>
+<span class="line"><span style="color:#E1E4E8">    mnm_row: </span><span style="color:#F97583">INTEGER</span></span>
+<span class="line"><span style="color:#E1E4E8">    mnm_col: </span><span style="color:#F97583">INTEGER</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">BEGIN</span></span>
+<span class="line"><span style="color:#E1E4E8">    score = EVALUATE(b)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">    IF</span><span style="color:#E1E4E8"> (score = </span><span style="color:#79B8FF">10</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">OR</span><span style="color:#E1E4E8"> (score = -</span><span style="color:#79B8FF">10</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">THEN</span></span>
+<span class="line"><span style="color:#E1E4E8">        RETURN(score)</span></span>
+<span class="line"><span style="color:#E1E4E8">    ENDIF</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">    IF</span><span style="color:#E1E4E8"> (ISMOVELEFT(b) = </span><span style="color:#79B8FF">FALSE</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">THEN</span></span>
+<span class="line"><span style="color:#E1E4E8">        RETURN(</span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">    ENDIF</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">    IF</span><span style="color:#E1E4E8"> ismax </span><span style="color:#F97583">THEN</span></span>
+<span class="line"><span style="color:#E1E4E8">        best = -</span><span style="color:#79B8FF">1000</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">        FOR</span><span style="color:#E1E4E8"> mnm_i = </span><span style="color:#79B8FF">1</span><span style="color:#F97583"> TO</span><span style="color:#79B8FF"> 9</span><span style="color:#F97583"> DO</span></span>
+<span class="line"><span style="color:#E1E4E8">            mnm_row = (mnm_i - </span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">DIV</span><span style="color:#79B8FF"> 3</span><span style="color:#E1E4E8"> + </span><span style="color:#79B8FF">1</span></span>
+<span class="line"><span style="color:#E1E4E8">            mnm_col = (mnm_i - </span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">MOD</span><span style="color:#79B8FF"> 3</span><span style="color:#E1E4E8"> + </span><span style="color:#79B8FF">1</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">            IF</span><span style="color:#E1E4E8"> b[mnm_i] = -</span><span style="color:#79B8FF">1</span><span style="color:#F97583"> THEN</span></span>
+<span class="line"><span style="color:#E1E4E8">                b[mnm_i] = AI</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">                tmp = MINIMAX(b, depth + </span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">NOT</span><span style="color:#E1E4E8"> ismax)</span></span>
+<span class="line"><span style="color:#E1E4E8">                best = (best + tmp + ABS(best - tmp)) / </span><span style="color:#79B8FF">2.0</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">                b[mnm_i] = -</span><span style="color:#79B8FF">1</span></span>
+<span class="line"><span style="color:#E1E4E8">            ENDIF</span></span>
+<span class="line"><span style="color:#E1E4E8">        ENDFOR</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">        RETURN(best)</span></span>
+<span class="line"><span style="color:#F97583">    ELSE</span></span>
+<span class="line"><span style="color:#E1E4E8">        best = </span><span style="color:#79B8FF">1000</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">        FOR</span><span style="color:#E1E4E8"> mnm_i = </span><span style="color:#79B8FF">1</span><span style="color:#F97583"> TO</span><span style="color:#79B8FF"> 9</span><span style="color:#F97583"> DO</span></span>
+<span class="line"><span style="color:#F97583">            IF</span><span style="color:#E1E4E8"> b[mnm_i] = </span><span style="color:#F97583">EMPTY</span><span style="color:#F97583"> THEN</span></span>
+<span class="line"><span style="color:#E1E4E8">                mnm_row = (mnm_i - </span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">DIV</span><span style="color:#79B8FF"> 3</span><span style="color:#E1E4E8"> + </span><span style="color:#79B8FF">1</span></span>
+<span class="line"><span style="color:#E1E4E8">                mnm_col = (mnm_i - </span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">MOD</span><span style="color:#79B8FF"> 3</span><span style="color:#E1E4E8"> + </span><span style="color:#79B8FF">1</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">                b[mnm_i] = PLAYER</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">                tmp = MINIMAX(b, depth + </span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">NOT</span><span style="color:#E1E4E8"> ismax)</span></span>
+<span class="line"><span style="color:#E1E4E8">                best = (best + tmp - ABS(best - tmp)) / </span><span style="color:#79B8FF">2.0</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">                b[mnm_i] = </span><span style="color:#F97583">EMPTY</span></span>
+<span class="line"><span style="color:#E1E4E8">            ENDIF</span></span>
+<span class="line"><span style="color:#E1E4E8">        ENDFOR</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">        RETURN(best)</span></span>
+<span class="line"><span style="color:#E1E4E8">    ENDIF</span></span>
+<span class="line"><span style="color:#F97583">END</span><span style="color:#E1E4E8"> MINIMAX</span></span></code></pre>
+<p>The algorithm recursively explores possible moves for both the AI and the human player, switching between maximizing and minimizing the score. This allows the AI to evaluate potential outcomes and select a move accordingly.</p>
+<h2 id="from-a-school-project-to-a-showcase">From a School Project to a Showcase</h2>
+<p>The project turned out to be more successful than we had initially expected. FANUC Czech was impressed enough to feature it as a showcase project at various fairs.</p>
+<p>We were also offered the opportunity to develop it further as our high school graduation project, turning an initial classroom challenge into something much bigger.</p>
+<p>What started as an experiment in robot communication eventually became a working combination of robotics, web development, and game AI.</p>
+<h2 id="watch-my-talk">Watch My Talk</h2>
+<p>I’ve also presented the project in a talk in Czech. You can watch it here:</p>
+<p><a href="https://www.youtube.com/watch?v=nvKCSyH4opc"><img src="https://img.youtube.com/vi/nvKCSyH4opc/0.jpg" alt="Tic-Tac-Toe on a FANUC CRX-10iA — project talk in Czech"></a></p>
+</div></article></main></body></html>
